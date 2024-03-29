@@ -13,8 +13,15 @@ using Serilog;
 
 namespace OSC.Applications.Api;
 
+/// <summary>
+/// Основной класс
+/// </summary>
 public class Program
 {
+    /// <summary>
+    /// Точка входа
+    /// </summary>
+    /// <param name="args">Параметры командной строки</param>
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);

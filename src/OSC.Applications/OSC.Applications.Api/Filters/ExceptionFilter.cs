@@ -3,8 +3,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace OSC.Applications.Api.Filters;
 
+/// <summary>
+/// Фильтр для неотловленных исключений, выброшенных при выполнении запроса контроллера
+/// </summary>
+/// <param name="logger">Стандартный логгер</param>
 public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 {
+    /// <inheritdoc />
     public void OnException(ExceptionContext context)
     {
         ProblemDetails problemDetails;
