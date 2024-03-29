@@ -38,7 +38,7 @@ internal sealed class ApplicationRepository : IApplicationsRepository
         _context.Entry(application).State = EntityState.Modified;
     }
 
-    public Task DeleteAsync(Application? application, CancellationToken cancellationToken)
+    public Task DeleteAsync(Application application, CancellationToken cancellationToken)
     {
         _context.Applications.Remove(application);
 

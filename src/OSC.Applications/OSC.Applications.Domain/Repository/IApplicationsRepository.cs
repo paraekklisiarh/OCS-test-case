@@ -12,7 +12,7 @@ public interface IApplicationsRepository
 
     void Update(Application application);
 
-    Task DeleteAsync(Application? application, CancellationToken cancellationToken);
+    Task DeleteAsync(Application application, CancellationToken cancellationToken);
 
     Task<IEnumerable<Application?>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken);
