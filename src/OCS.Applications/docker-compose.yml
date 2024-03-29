@@ -26,6 +26,6 @@ services:
     environment:
       - ConnectionStrings:ApplicationsApi=Server=postgres,5432;Database=$POSTGRES_DB;User Id=$POSTGRES_USER;Password=$POSTGRES_PASSWORD;
     build:
-      context: OSC.Applications.Api
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: OCS.Applications.Api/Dockerfile
     restart: on-failure
