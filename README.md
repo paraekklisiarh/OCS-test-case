@@ -1,3 +1,8 @@
 # OSC test case
 
-D
+[Тестовое задание](./docs/ТЗ.md)
+
+[DevNotes](./docs/DevNotes.md)
+
+## Установка
+
