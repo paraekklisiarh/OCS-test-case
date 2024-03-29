@@ -212,7 +212,7 @@ public class ApplicationsApiConstraintsTests(ApplicationsApiFactory applications
         // Act
         var response =
             await Client.GetAsync(
-                $"applications?submittedAfter={submittedAfter}&notSubmittedBefore={notSubmittedBefore}");
+                $"applications?submittedAfter={submittedAfter}&unsubmittedOlder={notSubmittedBefore}");
 
         // Assert
         Assert.False(response.IsSuccessStatusCode);
