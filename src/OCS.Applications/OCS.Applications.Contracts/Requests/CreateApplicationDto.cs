@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using OCS.Applications.Domain.Entitites;
 
 namespace OCS.Applications.Contracts.Requests;
@@ -9,6 +10,7 @@ public class CreateApplicationDto
     /// Идентификатор автора заявки
     /// </summary>
     [Required]
+    [JsonPropertyName("author")]
     public Guid AuthorId { get; init; }
     
     /// <summary>

@@ -1,29 +1,25 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using OCS.Applications.Domain.Entitites;
 
 namespace OCS.Applications.Contracts;
 
 public class ApplicationDto
 {
-    public ApplicationDto(Guid id, Guid authorId, Activity? activity, string name, string description, string outline)
+    public ApplicationDto()
     {
-        Id = id;
-        AuthorId = authorId;
-        Activity = activity;
-        Name = name;
-        Description = description;
-        Outline = outline;
+        
     }
 
     /// <summary>
     /// Идентификатор заявки
     /// </summary>
-    public Guid? Id { get; init; }
+    public Guid Id { get; init; }
     
     /// <summary>
     /// Идентификатор автора заявки
     /// </summary>
-    [Required]
+    [JsonPropertyName("author")]
     public Guid AuthorId { get; init; }
     
     /// <summary>

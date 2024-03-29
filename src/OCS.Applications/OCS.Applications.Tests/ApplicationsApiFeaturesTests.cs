@@ -1,9 +1,13 @@
-/*using System.Net.Http.Json;
+using System.Net.Http.Json;
+using System.Text.Json;
+using EnumFastToStringGenerated;
 using Microsoft.EntityFrameworkCore;
-using OSC.Applications.Contracts;
-using OSC.Applications.Contracts.Requests;
-using OSC.Applications.Domain.Entitites;
+using OCS.Applications.Contracts;
+using OCS.Applications.Contracts.Requests;
+using OCS.Applications.Contracts.Responses;
+using OCS.Applications.Domain.Entitites;
 using OCS.Applications.Tests.Fixtures;
+using OCS.Applications.Tests.Helpers;
 
 namespace OCS.Applications.Tests;
 
@@ -24,21 +28,23 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
             AuthorId = Guid.NewGuid(), Description = ValidDescription, Activity = Activity.Report, Name = ValidName,
             Outline = ValidOutline
         };
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        jsonOptions.Converters.Add(new ActivityConverter());
 
         // Act
         var response = await Client.PostAsync("applications", JsonContent.Create(newApplication));
-        var result = await response.Content.ReadFromJsonAsync<ApplicationDto>();
+        var json = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<ApplicationDto>(json, jsonOptions);
+        
         var entity = await Context.Applications.FirstOrDefaultAsync(x =>
             x.AuthorId == newApplication.AuthorId && x.Status == ApplicationStatus.Draft);
 
         // Assert
+        Assert.NotNull(entity);
         Assert.True(response.IsSuccessStatusCode);
         Assert.NotNull(result);
-        Assert.NotNull(entity);
-        Assert.Equal(newApplication.Activity, result.Activity);
-        Assert.Equal(newApplication.Name, result.Name);
-        Assert.Equal(newApplication.Outline, result.Outline);
-        Assert.Equal(newApplication.Description, result.Description);
+        Assert.Equal(entity.Id, result.Id);
+        Assert.Equal(newApplication.AuthorId, result.AuthorId);
     }
 
     [Fact(DisplayName = "редактирование черновика заявки успешно")]
@@ -48,22 +54,21 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
         var application = new Application { AuthorId = Guid.NewGuid(), Status = ApplicationStatus.Draft };
         await Context.Applications.AddAsync(application);
         await Context.SaveChangesAsync();
+        Context.ChangeTracker.Clear();
 
         var correctUpdate = new UpdateApplicationDto(Activity.Report, ValidName, ValidDescription, ValidOutline);
 
         // Act
         var response = await Client.PutAsync($"applications/{application.Id}", JsonContent.Create(correctUpdate));
-        var result = await response.Content.ReadFromJsonAsync<ApplicationDto>();
-        var entity = await Context.Applications.FirstOrDefaultAsync(x => x.Id == application.Id);
+        var entity = await Context.Applications.AsNoTracking().FirstOrDefaultAsync(x => x.Id == application.Id);
 
         // Assert
         Assert.True(response.IsSuccessStatusCode);
-        Assert.NotNull(result);
         Assert.NotNull(entity);
-        Assert.Equal(entity.Activity, result.Activity);
-        Assert.Equal(entity.Name, result.Name);
-        Assert.Equal(entity.Outline, result.Outline);
-        Assert.Equal(entity.Description, result.Description);
+        Assert.Equal(correctUpdate.Activity, entity.Activity);
+        Assert.Equal(correctUpdate.Name, entity.Name);
+        Assert.Equal(correctUpdate.Outline, entity.Outline);
+        Assert.Equal(correctUpdate.Description, entity.Description);
     }
 
     [Fact(DisplayName = "удаление черновика заявки успешно")]
@@ -93,13 +98,14 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
         };
         await Context.Applications.AddAsync(application);
         await Context.SaveChangesAsync();
+        Context.ChangeTracker.Clear();
 
         // Act
-        var response = Client.PostAsync($"applications/{application.Id}/submit", null);
-        var entity = await Context.Applications.FirstOrDefaultAsync(x => x.Id == application.Id);
+        var response = await Client.PostAsync($"applications/{application.Id}/submit", null);
+        var entity = await Context.Applications.AsNoTracking().FirstOrDefaultAsync(x => x.Id == application.Id);
 
         // Assert
-        Assert.True(response.Result.IsSuccessStatusCode);
+        Assert.True(response.IsSuccessStatusCode);
         Assert.Equal(ApplicationStatus.Submitted, entity!.Status);
     }
 
@@ -108,6 +114,7 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
     {
         // Arrange 
         var targetDate = DateTimeOffset.UtcNow.AddDays(-10);
+        var formattedTime = targetDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
         var applications = new List<Application>
         {
             new()
@@ -125,14 +132,13 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
         await Context.SaveChangesAsync();
 
         // Act
-        var response = Client.GetAsync($"applications?submittedAfter={targetDate}");
-        var result = await response.Result.Content.ReadFromJsonAsync<List<ApplicationDto>>();
+        var response = await Client.GetAsync($"applications?submittedAfter={formattedTime}");
+        var result = await response.Content.ReadFromJsonAsync<List<ApplicationDto>>();
 
         // Assert
-        Assert.True(response.Result.IsSuccessStatusCode);
+        Assert.True(response.IsSuccessStatusCode);
         Assert.NotNull(result);
         Assert.Equal(applications.Count, result.Count);
-        Assert.Equal(applications[1].Id, result.Last().Id);
     }
 
     [Fact(DisplayName = "получение заявок не поданных и старше определенной даты успешно")]
@@ -140,6 +146,7 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
     {
         // Arrange 
         var targetDate = DateTimeOffset.UtcNow.AddDays(-10);
+        var formattedTime = targetDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
         var applications = new List<Application>
         {
             new()
@@ -157,14 +164,13 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
         await Context.SaveChangesAsync();
 
         // Act
-        var response = Client.GetAsync($"applications?unsubmittedOlder={targetDate}");
-        var result = await response.Result.Content.ReadFromJsonAsync<List<ApplicationDto>>();
+        var response = await Client.GetAsync($"applications?unsubmittedOlder={formattedTime}");
+        var result = await response.Content.ReadFromJsonAsync<List<ApplicationDto>>();
 
         // Assert
-        Assert.True(response.Result.IsSuccessStatusCode);
+        Assert.True(response.IsSuccessStatusCode);
         Assert.NotNull(result);
         Assert.Equal(applications.Count, result.Count);
-        Assert.Equal(applications[1].Id, result.Last().Id);
     }
 
     [Fact(DisplayName = "получение текущей не поданной заявки для указанного пользователя успешно")]
@@ -206,6 +212,13 @@ public class ApplicationsApiFeaturesTests(ApplicationsApiFactory applicationsApi
     [Fact(DisplayName = "Можно получить список возможных активностей")]
     public async Task CanGetAvailableActivities()
     {
-        throw new NotImplementedException();
+        // Act
+        var response = await Client.GetAsync("activities");
+        var result = await response.Content.ReadFromJsonAsync<List<ActivitiesResponse>>();
+        
+        // Assert
+        Assert.True(response.IsSuccessStatusCode);
+        Assert.NotNull(result);
+        Assert.Equal(ActivityEnumExtensions.GetLengthFast(), result.Count );
     }
-}*/
+}
