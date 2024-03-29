@@ -48,13 +48,15 @@ internal sealed class ApplicationRepository : IApplicationsRepository
     public async Task<IEnumerable<Application?>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken)
     {
-        return await _context.Applications.AsTracking().Where(a => a.SubmittedAt > submittedAfter).ToListAsync(cancellationToken);
+        return await _context.Applications.AsTracking().Where(a => a.SubmittedAt > submittedAfter)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Application?>> GetUnsubmittedOlderAsync(DateTimeOffset olderThan,
         CancellationToken cancellationToken)
     {
-        return await _context.Applications.AsTracking().Where(a => a.Status == ApplicationStatus.Draft && a.SubmittedAt < olderThan)
+        return await _context.Applications.AsTracking()
+            .Where(a => a.Status == ApplicationStatus.Draft && a.CreatedAt < olderThan)
             .ToListAsync(cancellationToken);
     }
 

@@ -106,10 +106,10 @@ public class ApplicationsController(IApplicationsService applicationService) : C
 
     /// <summary>
     /// Получение списка заявок, поданных после указанной даты с параметром <see cref="submittedAfter" />;
-    /// Получение списка заявок, не поданных до указанной даты с параметром <see cref="unsubmittedOlder" />
+    /// Получение списка заявок, не поданных и старше указанной даты с параметром <see cref="unsubmittedOlder" />
     /// </summary>
-    /// <param name="submittedAfter">Дата, после которой необходимо получить заявки</param>
-    /// <param name="unsubmittedOlder">Дата, до которой необходимо получить заявки</param>
+    /// <param name="submittedAfter">Дата, после которой были поданы заявки</param>
+    /// <param name="unsubmittedOlder">Дата, до которой заявки не были поданы</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <status code="200">Список заявок</status>
     /// <status code="400">Передано два параметра либо ни одного</status>
@@ -131,7 +131,7 @@ public class ApplicationsController(IApplicationsService applicationService) : C
                 cancellationToken);
         else return BadRequest("One of the parameters must be specified.");
 
-        return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
+        return result.Success is false ? ReturnError(result) : new OkObjectResult(result.DataList);
     }
 
     /// <summary>
