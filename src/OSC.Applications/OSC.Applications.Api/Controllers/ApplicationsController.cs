@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OSC.Applications.Contracts;
 using OSC.Applications.Contracts.Requests;
+using OSC.Applications.Services.Activities;
 using OSC.Applications.Services.Applications;
 
 namespace OSC.Applications.Api.Controllers;
@@ -150,6 +151,24 @@ public class ApplicationsController(IApplicationsService applicationService) : C
         var result = await applicationService.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
 
         return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
+    }
+
+    /// <summary>
+    /// Получение списка возможных типов активности
+    /// </summary>
+    /// <param name="activitiesService">Сервис работы с активностями</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <http code="200">Список типов активности</http>
+    [HttpGet]
+    [Route("/activities")]
+    public IActionResult GetActivities([FromServices] IActivitiesService activitiesService,
+        CancellationToken cancellationToken)
+    {
+        var result = activitiesService.GetActivitiesAsync(cancellationToken);
+        return result.Success is false
+            ? new ObjectResult(new ProblemDetails { Title = "Internal server error", Detail = result.ErrorMessage })
+                { StatusCode = 500 }
+            : new OkObjectResult(result.DataList);
     }
 
     /// <summary>

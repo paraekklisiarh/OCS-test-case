@@ -1,8 +1,8 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using OSC.Applications.Contracts.Requests;
 using OSC.Applications.Domain.Entitites;
+using OSC.Applications.Services.Activities;
 using OSC.Applications.Services.Applications;
 using OSC.Applications.Services.Applications.Validators;
 
@@ -17,6 +17,7 @@ public static class DependencyInjection
     public static void RegisterServices(this IServiceCollection services)
     {
         services.AddTransient<IApplicationsService, ApplicationsService>();
+        services.AddTransient<IActivitiesService, ActivitiesService>();
     }
 
     /// <summary>
