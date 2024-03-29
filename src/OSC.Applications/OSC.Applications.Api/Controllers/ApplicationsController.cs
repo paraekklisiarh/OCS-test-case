@@ -26,7 +26,7 @@ public class ApplicationsController(IApplicationsService applicationService) : C
         if (!ModelState.IsValid)
             return new BadRequestObjectResult(ModelState);
 
-        var result = await applicationService.CreateAsync(application, cancellationToken);
+        var result = await applicationService.CreateDraftAsync(application, cancellationToken);
 
         return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
     }
@@ -147,7 +147,7 @@ public class ApplicationsController(IApplicationsService applicationService) : C
     [Route("/users/{authorId:guid}/currentapplication")]
     public async Task<IActionResult> GetUnsubmittedByAuthor(Guid authorId, CancellationToken cancellationToken)
     {
-        var result = await applicationService.GetByAuthorAsync(authorId, cancellationToken);
+        var result = await applicationService.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
 
         return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
     }

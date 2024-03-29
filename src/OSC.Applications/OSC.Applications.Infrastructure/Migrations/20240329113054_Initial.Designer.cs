@@ -12,8 +12,8 @@ using OSC.Applications.Infrastructure.Contexts;
 namespace OSC.Applications.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240328190522_AddApplications")]
-    partial class AddApplications
+    [Migration("20240329113054_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,22 +41,18 @@ namespace OSC.Applications.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("Outline")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("SubmittedAt")
@@ -64,8 +60,9 @@ namespace OSC.Applications.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId")
-                        .IsUnique();
+                    b.HasIndex("AuthorId", "Status")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 'Draft'");
 
                     b.ToTable("Applications", t =>
                         {

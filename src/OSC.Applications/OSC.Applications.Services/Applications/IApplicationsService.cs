@@ -8,7 +8,7 @@ namespace OSC.Applications.Services.Applications;
 /// </summary>
 public interface IApplicationsService
 {
-    public Task<OperationResult<ApplicationDto>> CreateAsync(CreateApplicationDto dto,
+    public Task<OperationResult<ApplicationDto>> CreateDraftAsync(CreateApplicationDto dto,
         CancellationToken cancellationToken);
 
     public Task<OperationResult<ApplicationDto>> UpdateAsync(Guid applicationId, UpdateApplicationDto dto,
@@ -26,5 +26,5 @@ public interface IApplicationsService
 
     public Task<OperationResult<ApplicationDto>> SubmitAsync(Guid applicationId, CancellationToken cancellationToken);
 
-    public Task<OperationResult<ApplicationDto>> GetByAuthorAsync(Guid ownerId, CancellationToken cancellationToken);
+    public Task<OperationResult<ApplicationDto>> GetUnsubmittedByAuthorAsync(Guid ownerId, CancellationToken cancellationToken);
 }

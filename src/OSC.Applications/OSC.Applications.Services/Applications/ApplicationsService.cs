@@ -15,26 +15,27 @@ public sealed class ApplicationsService(
 )
     : IApplicationsService
 {
-    public async Task<OperationResult<ApplicationDto>> CreateAsync(CreateApplicationDto dto,
+    public async Task<OperationResult<ApplicationDto>> CreateDraftAsync(CreateApplicationDto dto,
         CancellationToken cancellationToken)
     {
-        if (await repositoryManager.ApplicationsRepository.AnyWithAuthorAsync(dto.AuthorId,
+        if (await repositoryManager.ApplicationsRepository.AnyUnsubmittedByAuthorIdAsync(dto.AuthorId,
                 cancellationToken))
         {
-            logger.LogInformation("Application with author {dto.AuthorId} already exists", dto.AuthorId);
+            logger.LogInformation("Draft application with author {dto.AuthorId} already exists", dto.AuthorId);
             return new OperationResult<ApplicationDto>(false, OperationResultType.Conflict)
-                { ErrorMessage = $"Application with author id {dto.AuthorId} already exists" };
+                { ErrorMessage = $"Draft application with author id {dto.AuthorId} already exists" };
         }
 
         // Todo: Выглядит как костыль
         var entity = dto.Adapt<Application>();
         entity.CreatedAt = DateTimeOffset.UtcNow;
+        entity.Status = ApplicationStatus.Draft;
         
         var result = await repositoryManager.ApplicationsRepository
             .AddAsync(entity, cancellationToken);
         await repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("Created application: {ApplicationId}", result.Id);
+        logger.LogInformation("Created draft application: {ApplicationId}", result.Id);
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
             result.Adapt<ApplicationDto>());
     }
@@ -169,10 +170,10 @@ public sealed class ApplicationsService(
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success);
     }
 
-    public async Task<OperationResult<ApplicationDto>> GetByAuthorAsync(Guid authorId,
+    public async Task<OperationResult<ApplicationDto>> GetUnsubmittedByAuthorAsync(Guid authorId,
         CancellationToken cancellationToken)
     {
-        var result = await repositoryManager.ApplicationsRepository.GetUnsubmittedByAuthor(authorId, cancellationToken);
+        var result = await repositoryManager.ApplicationsRepository.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
 
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success, result.Adapt<ApplicationDto>());
     }

@@ -20,9 +20,10 @@ internal sealed class ApplicationRepository : IApplicationsRepository
         return _context.Applications.FirstOrDefaultAsync(a => a.Id == applicationId, cancellationToken);
     }
 
-    public Task<bool> AnyWithAuthorAsync(Guid applicationId, CancellationToken cancellationToken)
+    public Task<bool> AnyUnsubmittedByAuthorIdAsync(Guid applicationId, CancellationToken cancellationToken)
     {
-        return _context.Applications.AnyAsync(a => a.AuthorId == applicationId, cancellationToken);
+        return _context.Applications
+            .AnyAsync(a => a.AuthorId == applicationId && a.Status == ApplicationStatus.Draft, cancellationToken);
     }
 
     public async Task<Application> AddAsync(Application application, CancellationToken cancellationToken)
@@ -47,17 +48,17 @@ internal sealed class ApplicationRepository : IApplicationsRepository
     public async Task<IEnumerable<Application?>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken)
     {
-        return await _context.Applications.Where(a => a.SubmittedAt > submittedAfter).ToListAsync(cancellationToken);
+        return await _context.Applications.AsTracking().Where(a => a.SubmittedAt > submittedAfter).ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Application?>> GetUnsubmittedOlderAsync(DateTimeOffset olderThan,
         CancellationToken cancellationToken)
     {
-        return await _context.Applications.Where(a => a.Status == ApplicationStatus.Draft && a.SubmittedAt < olderThan)
+        return await _context.Applications.AsTracking().Where(a => a.Status == ApplicationStatus.Draft && a.SubmittedAt < olderThan)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Application?> GetUnsubmittedByAuthor(Guid authorId, CancellationToken cancellationToken)
+    public async Task<Application?> GetUnsubmittedByAuthorAsync(Guid authorId, CancellationToken cancellationToken)
     {
         return await _context.Applications.FirstOrDefaultAsync(
             x => x.AuthorId == authorId && x.Status == ApplicationStatus.Draft, cancellationToken);

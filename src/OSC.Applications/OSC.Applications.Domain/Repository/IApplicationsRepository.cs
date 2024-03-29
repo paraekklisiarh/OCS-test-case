@@ -6,7 +6,7 @@ public interface IApplicationsRepository
 {
     Task<Application?> GetByIdAsync(Guid applicationId, CancellationToken cancellationToken);
 
-    Task<bool> AnyWithAuthorAsync(Guid applicationId, CancellationToken cancellationToken);
+    Task<bool> AnyUnsubmittedByAuthorIdAsync(Guid applicationId, CancellationToken cancellationToken);
 
     Task<Application> AddAsync(Application application, CancellationToken cancellationToken);
 
@@ -20,5 +20,5 @@ public interface IApplicationsRepository
     Task<IEnumerable<Application?>> GetUnsubmittedOlderAsync(DateTimeOffset olderThan,
         CancellationToken cancellationToken);
 
-    Task<Application?> GetUnsubmittedByAuthor(Guid authorId, CancellationToken cancellationToken);
+    Task<Application?> GetUnsubmittedByAuthorAsync(Guid authorId, CancellationToken cancellationToken);
 }

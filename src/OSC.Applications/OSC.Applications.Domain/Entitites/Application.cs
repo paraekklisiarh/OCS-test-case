@@ -70,7 +70,7 @@ public sealed class Application
     /// <summary>
     /// Статус заявки
     /// </summary>
-    public ApplicationStatus? Status { get; set; }
+    public ApplicationStatus Status { get; set; }
     
     /// <summary>
     /// Дата создания заявки

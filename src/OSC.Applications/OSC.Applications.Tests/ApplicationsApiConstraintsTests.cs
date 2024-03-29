@@ -33,6 +33,28 @@ public class ApplicationsApiConstraintsTests(ApplicationsApiFactory applications
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
+    [Fact(DisplayName = "Можно создать черновик заявки, если существует отправленная заявка")]
+    public async Task CanCreateDraftApplicationIfSubmittedApplicationExists()
+    {
+        // Arrange
+        var application = new Application { AuthorId = Guid.NewGuid(), Status = ApplicationStatus.Submitted };
+        await Context.Applications.AddAsync(application);
+        await Context.SaveChangesAsync();
+
+        var newApplication = new CreateApplicationDto
+        {
+            AuthorId = application.AuthorId, Description = ValidDescription, Activity = Activity.Report,
+            Outline = ValidOutline, Name = ValidName
+        };
+
+        // Act
+        var response = await Client.PostAsync("applications", JsonContent.Create(newApplication));
+
+        // Assert
+        Assert.True(response.IsSuccessStatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
     // ToDo: to Theory
     [Fact(DisplayName = "нельзя создать заявку не указав идентификатор пользователя")]
     public async Task CanNotCreateApplicationWithoutAuthorId()
@@ -164,7 +186,7 @@ public class ApplicationsApiConstraintsTests(ApplicationsApiFactory applications
         Assert.False(response.IsSuccessStatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
-    
+
     [Fact(DisplayName = "нельзя отправить на рассмотрение не существующую заявку")]
     public async Task CanNotSubmitNonExistingApplication()
     {
@@ -191,7 +213,7 @@ public class ApplicationsApiConstraintsTests(ApplicationsApiFactory applications
         var response =
             await Client.GetAsync(
                 $"applications?submittedAfter={submittedAfter}&notSubmittedBefore={notSubmittedBefore}");
-        
+
         // Assert
         Assert.False(response.IsSuccessStatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

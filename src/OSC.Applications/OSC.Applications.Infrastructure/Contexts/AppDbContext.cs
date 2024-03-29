@@ -9,13 +9,18 @@ public class AppDbContext : DbContext
     {
     }
     
-    public DbSet<Application?> Applications { get; set; }
+    public DbSet<Application> Applications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Application>().HasKey(a => a.Id);
-        modelBuilder.Entity<Application>().HasIndex(a => a.AuthorId).IsUnique();
-
+        
+        // Cringe
+        modelBuilder.Entity<Application>()
+            .HasIndex(a => new{a.AuthorId, a.Status})
+            .HasFilter($"\"Status\" = '{ApplicationStatus.Draft}'")
+            .IsUnique();
+        
         modelBuilder.Entity<Application>().Property(a => a.Id).ValueGeneratedOnAdd();
         
         // Enums Activities, ApplicationStatus должны храниться в виде строк

@@ -12,7 +12,7 @@ namespace OSC.Applications.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Application",
+                name: "Applications",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -21,29 +21,30 @@ namespace OSC.Applications.Infrastructure.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Description = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
                     Outline = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    SubmittedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    SubmittedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Application", x => x.Id);
-                    table.CheckConstraint("CK_Application_Activity_Enum", "\"Activity\" IN ('Report', 'Masterclass', 'Discussion')");
-                    table.CheckConstraint("CK_Application_Status_Enum", "\"Status\" IN ('Draft', 'Submitted')");
+                    table.PrimaryKey("PK_Applications", x => x.Id);
+                    table.CheckConstraint("CK_Applications_Activity_Enum", "\"Activity\" IN ('Report', 'Masterclass', 'Discussion')");
+                    table.CheckConstraint("CK_Applications_Status_Enum", "\"Status\" IN ('Draft', 'Submitted')");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Application_AuthorId",
-                table: "Application",
-                column: "AuthorId",
-                unique: true);
+                name: "IX_Applications_AuthorId_Status",
+                table: "Applications",
+                columns: new[] { "AuthorId", "Status" },
+                unique: true,
+                filter: "\"Status\" = 'Draft'");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Application");
+                name: "Applications");
         }
     }
 }
