@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OCS.Applications.Contracts;
 using OCS.Applications.Contracts.Requests;
-using OCS.Applications.Services.Activities;
 using OCS.Applications.Services.Applications;
 using static OCS.Applications.Api.ResponseHandlers.OperationResultHandler;
 
@@ -134,23 +133,5 @@ public class ApplicationsController(IApplicationsService applicationService) : C
         else return BadRequest("One of the parameters must be specified.");
 
         return result.Success is false ? ReturnError(result) : new OkObjectResult(result.DataList);
-    }
-
-    /// <summary>
-    /// Получение списка возможных типов активности
-    /// </summary>
-    /// <param name="activitiesService">Сервис работы с активностями</param>
-    /// <param name="cancellationToken">Токен отмены</param>
-    /// <http code="200">Список типов активности</http>
-    [HttpGet]
-    [Route("/activities")]
-    public IActionResult GetActivities([FromServices] IActivitiesService activitiesService,
-        CancellationToken cancellationToken)
-    {
-        var result = activitiesService.GetActivitiesAsync(cancellationToken);
-        return result.Success is false
-            ? new ObjectResult(new ProblemDetails { Title = "Internal server error", Detail = result.ErrorMessage })
-                { StatusCode = 500 }
-            : new OkObjectResult(result.DataList);
     }
 }
