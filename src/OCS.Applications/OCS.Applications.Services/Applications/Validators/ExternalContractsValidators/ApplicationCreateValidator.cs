@@ -1,7 +1,7 @@
 using FluentValidation;
 using OCS.Applications.Contracts.Requests;
 
-namespace OCS.Applications.Services.Applications.Validators;
+namespace OCS.Applications.Services.Applications.Validators.ExternalContractsValidators;
 
 /// <summary>
 /// Валидация заявки при создании
