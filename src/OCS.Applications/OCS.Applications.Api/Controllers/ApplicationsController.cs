@@ -137,24 +137,6 @@ public class ApplicationsController(IApplicationsService applicationService) : C
     }
 
     /// <summary>
-    /// Получение текущей не поданной заявки для указанного пользователя
-    /// </summary>
-    /// <param name="authorId">ID автора заявки</param>
-    /// <param name="cancellationToken">Токен отмены</param>
-    /// <remarks>ToDo: переопределяется корень роута</remarks>
-    /// <http code="200">Заявка на участие</http>
-    /// <http code="404">Заявка не найдена</http>
-    /// <http code="404">Пользователь не найден</http>
-    [HttpGet]
-    [Route("/users/{authorId:guid}/currentapplication")]
-    public async Task<IActionResult> GetUnsubmittedByAuthor(Guid authorId, CancellationToken cancellationToken)
-    {
-        var result = await applicationService.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
-
-        return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
-    }
-
-    /// <summary>
     /// Получение списка возможных типов активности
     /// </summary>
     /// <param name="activitiesService">Сервис работы с активностями</param>
