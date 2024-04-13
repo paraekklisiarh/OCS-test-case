@@ -9,8 +9,6 @@ public sealed class OperationResult<T>
     public bool Success { get; set; }
     public OperationResultType Status { get; set; }
     public T? Data { get; set; }
-    public IEnumerable<T>? DataList { get; set; }
-    
     public string? ErrorMessage { get; set; }
 
     public OperationResult(bool success, OperationResultType status)
@@ -23,13 +21,6 @@ public sealed class OperationResult<T>
     {
         Success = success;
         Data = data;
-        Status = status;
-    }
-
-    public OperationResult(bool success, OperationResultType status, IEnumerable<T> dataList)
-    {
-        Success = success;
-        DataList = dataList;
         Status = status;
     }
 }

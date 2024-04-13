@@ -112,24 +112,24 @@ public sealed class ApplicationsService(
         return new OperationResult<ApplicationDto>(false, OperationResultType.NotFound);
     }
 
-    public async Task<OperationResult<ApplicationDto>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
+    public async Task<OperationResult<List<ApplicationDto>>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken)
     {
         var results =
             await repository.GetSubmittedAfterAsync(submittedAfter, cancellationToken);
 
-        return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
+        return new OperationResult<List<ApplicationDto>>(true, OperationResultType.Success,
             results.Select(a => a.Adapt<ApplicationDto>()).ToList());
     }
 
-    public async Task<OperationResult<ApplicationDto>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
+    public async Task<OperationResult<List<ApplicationDto>>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
         CancellationToken cancellationToken)
     {
         var results =
             await repository.GetUnsubmittedOlderAsync(unsubmittedOlder,
                 cancellationToken);
 
-        return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
+        return new OperationResult<List<ApplicationDto>>(true, OperationResultType.Success,
             results.Select(a => a.Adapt<ApplicationDto>()).ToList());
     }
 

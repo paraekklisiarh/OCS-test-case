@@ -5,5 +5,5 @@ namespace OCS.Applications.Services.Activities;
 
 public interface IActivitiesService
 {
-    public OperationResult<ActivitiesResponse> GetActivitiesAsync(CancellationToken cancellationToken);
+    public OperationResult<List<ActivitiesResponse>> GetActivitiesAsync(CancellationToken cancellationToken);
 }

@@ -123,7 +123,7 @@ public class ApplicationsController(IApplicationsService applicationService) : C
         if (unsubmittedOlder.HasValue && submittedAfter.HasValue)
             return BadRequest("Both parameters cannot be specified in the same request.");
 
-        OperationResult<ApplicationDto> result;
+        OperationResult<List<ApplicationDto>> result;
         if (unsubmittedOlder is not null)
             result = await applicationService.GetUnsubmittedOlderAsync(unsubmittedOlder.Value.ToUniversalTime(),
                 cancellationToken);
@@ -132,6 +132,6 @@ public class ApplicationsController(IApplicationsService applicationService) : C
                 cancellationToken);
         else return BadRequest("One of the parameters must be specified.");
 
-        return result.Success is false ? ReturnError(result) : new OkObjectResult(result.DataList);
+        return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
     }
 }

@@ -23,6 +23,6 @@ public class ActivitiesController : ControllerBase
         return result.Success is false
             ? new ObjectResult(new ProblemDetails { Title = "Internal server error", Detail = result.ErrorMessage })
                 { StatusCode = 500 }
-            : new OkObjectResult(result.DataList);
+            : new OkObjectResult(result.Data);
     }
 }
