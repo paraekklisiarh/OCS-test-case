@@ -16,8 +16,6 @@ public static class DependencyInjection
         services.RegisterPostgres(configuration);
 
         services.AddScoped<IApplicationsRepository, ApplicationRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IRepositoryManager, ApplicationsRepositoryManager>();
     }
 
     private static void RegisterPostgres(this IServiceCollection services, IConfiguration configuration)
