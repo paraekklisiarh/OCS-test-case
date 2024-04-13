@@ -106,32 +106,34 @@ public class ApplicationsController(IApplicationsService applicationService) : C
     }
 
     /// <summary>
-    /// Получение списка заявок, поданных после указанной даты с параметром <see cref="submittedAfter" />;
-    /// Получение списка заявок, не поданных и старше указанной даты с параметром <see cref="unsubmittedOlder" />
+    /// Получение списка заявок, поданных после указанной даты с параметром <see cref="GetApplicationsRequest.SubmittedAfter" />;
+    /// Получение списка заявок, не поданных и старше указанной даты с параметром <see cref="GetApplicationsRequest.UnsubmittedOlder" />
     /// </summary>
-    /// <param name="submittedAfter">Дата, после которой были поданы заявки</param>
-    /// <param name="unsubmittedOlder">Дата, до которой заявки не были поданы</param>
+    /// <param name="request">Запрос, содержащий параметры выборки <see cref="GetApplicationsRequest.SubmittedAfter"/>
+    /// или <see cref="GetApplicationsRequest.UnsubmittedOlder"/></param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <status code="200">Список заявок</status>
-    /// <status code="400">Передано два параметра либо ни одного</status>
+    /// <status code="400">Переданы два параметра либо ни одного</status>
     [HttpGet]
-    public async Task<IActionResult> GetSubmittedAfter(
-        [FromQuery] DateTimeOffset? unsubmittedOlder,
-        [FromQuery] DateTimeOffset? submittedAfter,
+    public async Task<IActionResult> GetApplications(
+        [FromQuery] GetApplicationsRequest request,
         CancellationToken cancellationToken)
     {
-        if (unsubmittedOlder.HasValue && submittedAfter.HasValue)
-            return BadRequest("Both parameters cannot be specified in the same request.");
-
-        OperationResult<List<ApplicationDto>> result;
-        if (unsubmittedOlder is not null)
-            result = await applicationService.GetUnsubmittedOlderAsync(unsubmittedOlder.Value.ToUniversalTime(),
+        if (!ModelState.IsValid)
+            return new BadRequestObjectResult(ModelState);
+        
+        OperationResult<List<ApplicationDto>> result = null!;
+        if (request.UnsubmittedOlder is not null)
+            result = await applicationService.GetUnsubmittedOlderAsync(request.UnsubmittedOlder.Value.ToUniversalTime(),
                 cancellationToken);
-        else if (submittedAfter is not null)
-            result = await applicationService.GetSubmittedAfterAsync(submittedAfter.Value.ToUniversalTime(),
+        else if (request.SubmittedAfter is not null)
+            result = await applicationService.GetSubmittedAfterAsync(request.SubmittedAfter.Value.ToUniversalTime(),
                 cancellationToken);
-        else return BadRequest("One of the parameters must be specified.");
 
+        if (result is null)
+            return new ObjectResult(new ProblemDetails
+            { Title = "Internal server error", Detail = "Something went wrong in the server" }) { StatusCode = 500 };
+        
         return result.Success is false ? ReturnError(result) : new OkObjectResult(result.Data);
     }
 }

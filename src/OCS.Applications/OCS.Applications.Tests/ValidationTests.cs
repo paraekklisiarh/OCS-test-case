@@ -1,6 +1,8 @@
+using FluentValidation.TestHelper;
 using OCS.Applications.Contracts.Requests;
 using OCS.Applications.Domain.Entitites;
-using OCS.Applications.Services.Applications.Validators;
+using OCS.Applications.Services.Applications.Validators.BusinessRulesValidators;
+using OCS.Applications.Services.Applications.Validators.ExternalContractsValidators;
 
 namespace OCS.Applications.Tests;
 
@@ -63,5 +65,27 @@ public class ValidationTests
         var result = _updateValidator.Validate(app);
 
         Assert.False(result.IsValid);
+    }
+    
+    [Fact(DisplayName = "запрос на получение поданных и не поданных заявок одновременно должен считаться не корректным")]
+    public void BothParametersSpecified_ReturnsErrorMessage()
+    {
+        var request = new GetApplicationsRequest { UnsubmittedOlder = DateTimeOffset.Now, SubmittedAfter = DateTimeOffset.Now };
+        var validator = new GetApplicationsValidator();
+
+        var result = validator.TestValidate(request);
+
+        result.ShouldHaveValidationErrorFor(x => x);
+    }
+
+    [Fact(DisplayName = "При запросе списка заявок нужно указать один из параметров даты")]
+    public void NeitherParameterSpecified_ReturnsErrorMessage()
+    {
+        var request = new GetApplicationsRequest{UnsubmittedOlder = null, SubmittedAfter = null};
+        var validator = new GetApplicationsValidator();
+        
+        var result = validator.TestValidate(request);
+
+        result.ShouldHaveValidationErrorFor(x => x);
     }
 }
