@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using OCS.Applications.Contracts;
 using OCS.Applications.Services.Applications;
 
 namespace OCS.Applications.Api.ResponseHandlers;
@@ -14,7 +13,7 @@ public static class OperationResultHandler
     /// </summary>
     /// <param name="result">Результат выполнения операции</param>
     /// <returns>Корректный статус-код</returns>
-    internal static IActionResult ReturnError(OperationResult<ApplicationDto> result)
+    internal static IActionResult ReturnError<T>(OperationResult<T> result) where T : class
     {
         if (result.Status is OperationResultType.Success)
             throw new ArgumentException("Success result can't be processed in this method", nameof(result));
