@@ -39,9 +39,9 @@ public sealed class OperationResult<T>
 public enum OperationResultType
 {
     Error = 0,
-    Success = 200,
-    NotFound = 404,
-    Conflict = 409,
-    Forbidden = 403,
-    ValidationError = 422,
+    Success,
+    NotFound,
+    Conflict,
+    Forbidden,
+    ValidationError,
 }
