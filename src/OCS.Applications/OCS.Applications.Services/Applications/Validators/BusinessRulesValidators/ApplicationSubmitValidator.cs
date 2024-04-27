@@ -1,7 +1,7 @@
 using FluentValidation;
 using OCS.Applications.Domain.Entitites;
 
-namespace OCS.Applications.Services.Applications.Validators;
+namespace OCS.Applications.Services.Applications.Validators.BusinessRulesValidators;
 
 /// <summary>
 /// Валидация заявки перед отправкой на рассмотрение

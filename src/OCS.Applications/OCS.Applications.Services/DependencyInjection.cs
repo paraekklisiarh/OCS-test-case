@@ -4,7 +4,8 @@ using OCS.Applications.Contracts.Requests;
 using OCS.Applications.Domain.Entitites;
 using OCS.Applications.Services.Activities;
 using OCS.Applications.Services.Applications;
-using OCS.Applications.Services.Applications.Validators;
+using OCS.Applications.Services.Applications.Validators.BusinessRulesValidators;
+using OCS.Applications.Services.Applications.Validators.ExternalContractsValidators;
 
 namespace OCS.Applications.Services;
 
@@ -29,5 +30,6 @@ public static class DependencyInjection
         services.AddScoped<IValidator<CreateApplicationDto>, ApplicationCreateValidator>();
         services.AddScoped<IValidator<UpdateApplicationDto>, ApplicationUpdateValidator>();
         services.AddScoped<IValidator<Application>, ApplicationSubmitValidator>();
+        services.AddScoped<IValidator<GetApplicationsRequest>, GetApplicationsValidator>();
     }
 }

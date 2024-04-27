@@ -9,8 +9,6 @@ public sealed class OperationResult<T>
     public bool Success { get; set; }
     public OperationResultType Status { get; set; }
     public T? Data { get; set; }
-    public IEnumerable<T>? DataList { get; set; }
-    
     public string? ErrorMessage { get; set; }
 
     public OperationResult(bool success, OperationResultType status)
@@ -25,13 +23,6 @@ public sealed class OperationResult<T>
         Data = data;
         Status = status;
     }
-
-    public OperationResult(bool success, OperationResultType status, IEnumerable<T> dataList)
-    {
-        Success = success;
-        DataList = dataList;
-        Status = status;
-    }
 }
 /// <summary>
 /// Результат выполнения операции, ассоциированный с http-кодом
@@ -39,9 +30,9 @@ public sealed class OperationResult<T>
 public enum OperationResultType
 {
     Error = 0,
-    Success = 200,
-    NotFound = 404,
-    Conflict = 409,
-    Forbidden = 403,
-    ValidationError = 422,
+    Success,
+    NotFound,
+    Conflict,
+    Forbidden,
+    ValidationError,
 }

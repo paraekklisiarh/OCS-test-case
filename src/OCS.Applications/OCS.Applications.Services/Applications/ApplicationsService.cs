@@ -9,7 +9,7 @@ using OCS.Applications.Domain.Repository;
 namespace OCS.Applications.Services.Applications;
 
 public sealed class ApplicationsService(
-    IRepositoryManager repositoryManager,
+    IApplicationsRepository repository,
     IValidator<Application> submitValidator,
     ILogger<ApplicationsService> logger
 )
@@ -18,7 +18,7 @@ public sealed class ApplicationsService(
     public async Task<OperationResult<ApplicationDto>> CreateDraftAsync(CreateApplicationDto dto,
         CancellationToken cancellationToken)
     {
-        if (await repositoryManager.ApplicationsRepository.AnyUnsubmittedByAuthorIdAsync(dto.AuthorId,
+        if (await repository.AnyUnsubmittedByAuthorIdAsync(dto.AuthorId,
                 cancellationToken))
         {
             logger.LogInformation("Draft application with author {dto.AuthorId} already exists", dto.AuthorId);
@@ -31,9 +31,9 @@ public sealed class ApplicationsService(
         entity.CreatedAt = DateTimeOffset.UtcNow;
         entity.Status = ApplicationStatus.Draft;
         
-        var result = await repositoryManager.ApplicationsRepository
+        var result = await repository
             .AddAsync(entity, cancellationToken);
-        await repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+        
 
         logger.LogInformation("Created draft application: {ApplicationId}", result.Id);
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
@@ -46,7 +46,7 @@ public sealed class ApplicationsService(
         CancellationToken cancellationToken)
     {
         // проверяем существует ли заявка
-        var application = await repositoryManager.ApplicationsRepository.GetByIdAsync(applicationId, cancellationToken);
+        var application = await repository.GetByIdAsync(applicationId, cancellationToken);
         if (application is null)
         {
             logger.LogInformation("Application with id {applicationId} not found", applicationId);
@@ -66,8 +66,8 @@ public sealed class ApplicationsService(
         application.Description = dto.Description;
         application.Outline = dto.Outline;
 
-        repositoryManager.ApplicationsRepository.Update(application);
-        await repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await repository.Update(application, cancellationToken);
+        
 
         logger.LogInformation("Updated dto {ApplicationId}", applicationId);
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
@@ -77,7 +77,7 @@ public sealed class ApplicationsService(
     public async Task<OperationResult<ApplicationDto>> DeleteAsync(Guid applicationId,
         CancellationToken cancellationToken)
     {
-        var application = await repositoryManager.ApplicationsRepository.GetByIdAsync(applicationId, cancellationToken);
+        var application = await repository.GetByIdAsync(applicationId, cancellationToken);
         // нельзя удалить или редактировать не существующую заявку
         if (application is null)
         {
@@ -93,8 +93,8 @@ public sealed class ApplicationsService(
                 { ErrorMessage = "Application cannot be deleted" };
         }
 
-        await repositoryManager.ApplicationsRepository.DeleteAsync(application, cancellationToken);
-        await repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await repository.DeleteAsync(application, cancellationToken);
+        
 
         logger.LogInformation("Deleted dto {ApplicationId}", applicationId);
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success);
@@ -102,7 +102,7 @@ public sealed class ApplicationsService(
 
     public async Task<OperationResult<ApplicationDto>> GetAsync(Guid applicationId, CancellationToken cancellationToken)
     {
-        var result = await repositoryManager.ApplicationsRepository.GetByIdAsync(applicationId, cancellationToken);
+        var result = await repository.GetByIdAsync(applicationId, cancellationToken);
 
         if (result is not null)
             return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
@@ -112,24 +112,24 @@ public sealed class ApplicationsService(
         return new OperationResult<ApplicationDto>(false, OperationResultType.NotFound);
     }
 
-    public async Task<OperationResult<ApplicationDto>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
+    public async Task<OperationResult<List<ApplicationDto>>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken)
     {
         var results =
-            await repositoryManager.ApplicationsRepository.GetSubmittedAfterAsync(submittedAfter, cancellationToken);
+            await repository.GetSubmittedAfterAsync(submittedAfter, cancellationToken);
 
-        return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
+        return new OperationResult<List<ApplicationDto>>(true, OperationResultType.Success,
             results.Select(a => a.Adapt<ApplicationDto>()).ToList());
     }
 
-    public async Task<OperationResult<ApplicationDto>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
+    public async Task<OperationResult<List<ApplicationDto>>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
         CancellationToken cancellationToken)
     {
         var results =
-            await repositoryManager.ApplicationsRepository.GetUnsubmittedOlderAsync(unsubmittedOlder,
+            await repository.GetUnsubmittedOlderAsync(unsubmittedOlder,
                 cancellationToken);
 
-        return new OperationResult<ApplicationDto>(true, OperationResultType.Success,
+        return new OperationResult<List<ApplicationDto>>(true, OperationResultType.Success,
             results.Select(a => a.Adapt<ApplicationDto>()).ToList());
     }
 
@@ -137,7 +137,7 @@ public sealed class ApplicationsService(
         CancellationToken cancellationToken)
     {
         // проверка наличия заявки
-        var application = await repositoryManager.ApplicationsRepository.GetByIdAsync(applicationId, cancellationToken);
+        var application = await repository.GetByIdAsync(applicationId, cancellationToken);
         if (application is null)
         {
             logger.LogInformation("Application with id {applicationId} not found", applicationId.ToString());
@@ -163,8 +163,8 @@ public sealed class ApplicationsService(
         application.Status = ApplicationStatus.Submitted;
         application.SubmittedAt = DateTimeOffset.UtcNow;
 
-        repositoryManager.ApplicationsRepository.Update(application);
-        await repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+        await repository.Update(application, cancellationToken);
+        
 
         logger.LogInformation("Submitted dto {ApplicationId}", applicationId);
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success);
@@ -173,7 +173,7 @@ public sealed class ApplicationsService(
     public async Task<OperationResult<ApplicationDto>> GetUnsubmittedByAuthorAsync(Guid authorId,
         CancellationToken cancellationToken)
     {
-        var result = await repositoryManager.ApplicationsRepository.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
+        var result = await repository.GetUnsubmittedByAuthorAsync(authorId, cancellationToken);
 
         return new OperationResult<ApplicationDto>(true, OperationResultType.Success, result.Adapt<ApplicationDto>());
     }

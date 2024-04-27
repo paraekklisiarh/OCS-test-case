@@ -29,20 +29,25 @@ internal sealed class ApplicationRepository : IApplicationsRepository
     public async Task<Application> AddAsync(Application application, CancellationToken cancellationToken)
     {
         await _context.AddAsync(application, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         return application;
     }
 
-    public void Update(Application application)
+    public async Task<Application> Update(Application application, CancellationToken cancellationToken)
     {
-        _context.Entry(application).State = EntityState.Modified;
+        _context.Applications.Update(application);
+        
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return application;
     }
 
     public Task DeleteAsync(Application application, CancellationToken cancellationToken)
     {
         _context.Applications.Remove(application);
 
-        return Task.CompletedTask;
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Application?>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,

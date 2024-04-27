@@ -10,7 +10,7 @@ public interface IApplicationsRepository
 
     Task<Application> AddAsync(Application application, CancellationToken cancellationToken);
 
-    void Update(Application application);
+    Task<Application> Update(Application application, CancellationToken cancellationToken);
 
     Task DeleteAsync(Application application, CancellationToken cancellationToken);
 

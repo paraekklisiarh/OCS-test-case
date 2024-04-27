@@ -18,10 +18,10 @@ public interface IApplicationsService
 
     public Task<OperationResult<ApplicationDto>> GetAsync(Guid applicationId, CancellationToken cancellationToken);
 
-    public Task<OperationResult<ApplicationDto>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
+    public Task<OperationResult<List<ApplicationDto>>> GetSubmittedAfterAsync(DateTimeOffset submittedAfter,
         CancellationToken cancellationToken);
 
-    public Task<OperationResult<ApplicationDto>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
+    public Task<OperationResult<List<ApplicationDto>>> GetUnsubmittedOlderAsync(DateTimeOffset unsubmittedOlder,
         CancellationToken cancellationToken);
 
     public Task<OperationResult<ApplicationDto>> SubmitAsync(Guid applicationId, CancellationToken cancellationToken);
